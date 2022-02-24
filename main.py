@@ -1,7 +1,7 @@
 import random
 from tkinter import *
 import time
-
+import math
 
 def generate_places(number, places):
     for i in range(number):
@@ -102,8 +102,7 @@ def simulated_annealing(matrix_of_distances, currentSolution):
     temp = 40
     bestSolution = currentSolution
     count = 0
-    while temp >= 0:
-        temp -= 3
+    while temp > 0:
         for k in range(10000):
 
             next_solutions = getMixedSolutions(currentSolution)
@@ -113,15 +112,17 @@ def simulated_annealing(matrix_of_distances, currentSolution):
             if routeLength(matrix_of_distances, randomSol) <= routeLength(matrix_of_distances, currentSolution):
                 currentSolution = randomSol
             else:
-                delta = routeLength(matrix_of_distances, randomSol) - routeLength(matrix_of_distances, currentSolution)
+                delta = routeLength(matrix_of_distances, currentSolution) - routeLength(matrix_of_distances, randomSol)
                 u = random.uniform(0, 1)
-                if u > delta:
+
+                if u < math.e**(delta/temp):
                     currentSolution = randomSol
                     count += 1
 
             if routeLength(matrix_of_distances, currentSolution) < routeLength(matrix_of_distances, bestSolution):
                 bestSolution = currentSolution
-    print("Kolkokrat vzalo riešenie, ktore je horšie: " + str(count))
+        temp -= 3
+    #print("Kolkokrat vzalo riešenie, ktore je horšie: " + str(count))
     return bestSolution
 
 
@@ -135,9 +136,10 @@ root = Tk()
 canvas = Canvas(root, bg='white', width=900, height=500)
 canvas.pack(fill=BOTH, expand=1)
 
-generate_places(number_of_places, places)
+#generate_places(number_of_places, places)
 #places = [[27, 128], [14, 196], [23, 191], [80, 128], [91, 168], [133, 87], [27, 174], [24, 91], [87, 153], [161, 39], [130, 28], [6, 74], [108, 118], [27, 157], [155, 198], [157, 163], [143, 63], [16, 139], [55, 156], [14, 136], [71, 96], [140, 7], [123, 107], [115, 107], [13, 26], [69, 100], [98, 69], [144, 6], [91, 150], [67, 110], [168, 173], [137, 1], [180, 166], [52, 29], [42, 99], [110, 160], [110, 122], [118, 61], [44, 143], [147, 78]]
-
+places = [[27, 128], [14, 196], [23, 191], [80, 128], [91, 168], [133, 87], [27, 174], [24, 91], [87, 153], [161, 39], [130, 28], [6, 74], [108, 118], [27, 157], [155, 198], [157, 163], [143, 63], [16, 139], [55, 156], [14, 136]]
+#places = [[162, 82],[18, 135],[14, 68],[139, 88],[82, 16],[199, 146],[145, 69],[27, 118],[200, 39],[156, 50],[138, 96],[14, 30],[88, 42],[1, 40],[142, 63],[111, 115],[65, 87],[76, 53],[24, 106],[193, 180]]
 create_matrix_of_distances(places, matrix_of_distances)
 
 currentSolution = randomSolution(matrix_of_distances)
@@ -149,6 +151,7 @@ end_tabu = time.time()
 start_sa = time.time()
 annealing_solution = simulated_annealing(matrix_of_distances, currentSolution)
 end_sa = time.time()
+
 
 print(tabu_solution)
 print("Route cost - tabu search: " + str(routeLength(matrix_of_distances, tabu_solution)))
